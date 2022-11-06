@@ -1,0 +1,2 @@
+global mqtt_client
+global clickhouse_client

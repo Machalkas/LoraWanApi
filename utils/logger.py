@@ -1,5 +1,5 @@
 from datetime import datetime
-from config import DEBUG
+from config import IS_DEBUG
 
 
 class Logger:
@@ -32,7 +32,7 @@ class Logger:
         self.log(message.upper(), "", style)
 
     def debug(self, message: str, style: str = ""):
-        if DEBUG:
+        if IS_DEBUG:
             self.log(message, "DEBUG", style)
 
     def log(self, message: str, log_type: str, style: str = ""):

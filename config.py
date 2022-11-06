@@ -13,4 +13,10 @@ CLICKHOUSE_PORT = os.getenv("CLICKHOUSE_PORT") or "19000"
 CLICKHOUSE_USER = os.getenv("CLICKHOUSE_USER") or "default"
 CLICKHOUSE_PASSWORD = os.getenv("CLICKHOUSE_PASSWORD") or None
 
-DEBUG = False if os.getenv("DEBUG") == "false".lower() else True
+MQTT_HOST = os.getenv("MQTT_HOST") or "localhost"
+MQTT_PORT = os.getenv("MQTT_PORT") or 1883
+MQTT_USERNAME = os.getenv("MQTT_USERNAME") or None
+MQTT_PASSWORD = os.getenv("MQTT_PASSWORD") or None
+MQTT_TOPICKS_TO_SUBSCRIBE = os.getenv("MQTT_TOPICKS_TO_SUBSCRIBE") or ["statistic"]
+
+IS_DEBUG = False if os.getenv("DEBUG") == "false".lower() else True

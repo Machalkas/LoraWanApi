@@ -5,16 +5,22 @@ from utils import logger
 
 
 class MqttClient:
-    def __init__(self, host: str, port: int = 1883, username: str = None, password: str = None):
+    def __init__(self,
+                 host: str,
+                 port: int = 1883,
+                 username: str = None,
+                 password: str = None,
+                 topics_to_subscribe: list = None):
         self.client = Client("LoraWAN_api_service")
         self.host = host
         self.port = port
+        self.topics_to_subscribe = topics_to_subscribe
         if username is not None:
             self.client.set_auth_credentials(username, password)
         self.client.on_message = self.on_message
         self.client.on_connect = self.on_connect
     
-    def subscribe(self, topics: Union[str, list], qos: int =1):
+    def subscribe(self, topics: Union[str, list], qos: int = 1):
         if isinstance(topics, str):
             topics = [topics]
         for topic in topics:
@@ -25,6 +31,8 @@ class MqttClient:
 
     def on_connect(self, client, flags, rc, properties):
         logger.debug(f"Connect to mqtt ({self.host}:{self.port})")
+        if self.topics_to_subscribe is not None:
+            self.subscribe(self.topics_to_subscribe)
     
     async def connect(self):
         await self.client.connect(self.host, self.port)
