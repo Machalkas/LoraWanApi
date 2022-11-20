@@ -6,12 +6,14 @@ from utils import logger
 
 class MqttClient:
     def __init__(self,
+                 handler,
                  host: str,
                  port: int = 1883,
                  username: str = None,
                  password: str = None,
                  topics_to_subscribe: list = None):
         self.client = Client("LoraWAN_api_service")
+        self.handler = handler
         self.host = host
         self.port = port
         self.topics_to_subscribe = topics_to_subscribe
@@ -26,11 +28,15 @@ class MqttClient:
         for topic in topics:
             self.client.subscribe(topic, qos)
 
-    def on_message(self, client, topic, payload: bytes, qos, properties):
-        logger.debug(f"mqtt message: {payload.decode('utf-8')}, topic: {topic}, qos: {qos}")
+    def on_message(self, client, topic: str, payload: bytes, qos, properties):
+        if topic.endswith("response"):
+            return
+        payload = payload.decode('utf-8')
+        result = asyncio.ensure_future(self.handler.handle_request(payload, topic), loop=self.event_loop)
 
     def on_connect(self, client, flags, rc, properties):
         logger.debug(f"Connect to mqtt ({self.host}:{self.port})")
+        self.event_loop = asyncio.get_event_loop()
         if self.topics_to_subscribe is not None:
             self.subscribe(self.topics_to_subscribe)
 

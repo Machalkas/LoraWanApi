@@ -47,10 +47,10 @@ class ClickHouseGlobals:
         while True:
             if not self.global_vars.query_queue.empty():
                 query_dict: dict = self.global_vars.query_queue.get()
+                alias = query_dict.get("alias_name")
                 try:
                     # TODO: catch exceptions here
                     self.clickhouse_client.execute(query_dict["query"], query_dict["values"], types_check=True)
-                    alias = query_dict.get("alias_name")
                     inserts_count = len(query_dict["values"])
                     logger.important(f"Write to db ({inserts_count}) - {alias}")
                 except Exception as e:
@@ -71,7 +71,7 @@ class ClickHouseGlobals:
                     {"query": child_self.query, "values": child_self.values_list, "alias_name": child_self.alias_name})
                 child_self.values_list = []
                 timer = time.time()
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0.1)
 
 
 class ClickHouseCustomClient(ClickHouseGlobals):

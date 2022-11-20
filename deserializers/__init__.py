@@ -20,6 +20,7 @@ class BaseDeserializer(ABC):
     def __init__(self, message: Union[str, dict]) -> None:
         if isinstance(message, str):
             message = json.loads(message)
+        self.deserialize(message)
 
     @abstractmethod
     def deserialize(self, message: dict):
@@ -34,9 +35,24 @@ class BaseDeserializer(ABC):
         return raw_dict
 
 
-class PowerDataDeserializer(BaseDeserializer):
+class StatisticDeserializer(BaseDeserializer):
+    @catch_key_error
     def deserialize(self, message: dict):
-        self.datetime: datetime = datetime.strptime(message["datetime"])
+        self.type: str = message["type"]
+        self.data: BaseDeserializer = None
+        match self.type:
+            case "power":
+                self.data = PowerDataDeserializer(message)
+            case "traffic":
+                self.data = TrafficDataDeserializer(message)
+            case _:
+                raise DeserializerValueError("wrong type")
+
+
+class PowerDataDeserializer(BaseDeserializer):
+    @catch_key_error
+    def deserialize(self, message: dict):
+        self.datetime: datetime = datetime.strptime(message["datetime"], "%Y-%m-%d %H:%M:%S.%f")
         self.counter: int = int(message["counter"])
         self.phase_a: float = float(message["phase_a"])
         self.phase_b: float = float(message["phase_b"])
@@ -45,8 +61,9 @@ class PowerDataDeserializer(BaseDeserializer):
 
 
 class TrafficDataDeserializer(BaseDeserializer):
+    @catch_key_error
     def deserialize(self, message: dict):
-        self.datetime: datetime = datetime.strptime(message["datetime"])
+        self.datetime: datetime = datetime.strptime(message["datetime"], "%Y-%m-%d %H:%M:%S.%f")
         self.counter: int = int(message["counter"])
         self.traffic_plan_1: float = float(message["traffic_plan_1"])
         self.traffic_plan_2: float = float(message["traffic_plan_2"])
