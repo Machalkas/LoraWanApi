@@ -35,7 +35,7 @@ class ClickHouseGlobals:
                 target=self.event_loop, args=(self.global_vars.async_loop,))
             self.global_vars.event_loop_thread.daemon = True
             self.global_vars.event_loop_thread.start()
-        asyncio.ensure_future(self.writer_checker(max_inserts_count, min_inserts_count,
+        asyncio.ensure_future(self.scheduler(max_inserts_count, min_inserts_count,
                               timeout_sec, child_self), loop=self.global_vars.async_loop)
 
     def event_loop(self, loop: asyncio.AbstractEventLoop):
@@ -55,10 +55,10 @@ class ClickHouseGlobals:
                     logger.important(f"Write to db ({inserts_count}) - {alias}")
                 except Exception as e:
                     logger.error(f"Error in {alias} while try too write data do db: {e}")
-            await asyncio.sleep(1)
+            await asyncio.sleep(2)
         loop.stop()
 
-    async def writer_checker(self, max_inserts_count: int, min_inserts_count: int, timeout: int, child_self):
+    async def scheduler(self, max_inserts_count: int, min_inserts_count: int, timeout: int, child_self):
         timer = time.time()
         while True:
             if len(child_self.values_list) >= max_inserts_count:
@@ -71,10 +71,10 @@ class ClickHouseGlobals:
                     {"query": child_self.query, "values": child_self.values_list, "alias_name": child_self.alias_name})
                 child_self.values_list = []
                 timer = time.time()
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.5)
 
 
-class ClickHouseWriter(ClickHouseGlobals):
+class ClickHouseCustomClient(ClickHouseGlobals):
     def __init__(self,
                  clickhouse_client: Client,
                  create_table_query: str = None,
@@ -130,7 +130,7 @@ if __name__ == "__main__":
     clickhouse_client = Client(host=CLICKHOUSE_HOST,
                                port=CLICKHOUSE_PORT,
                                user=CLICKHOUSE_USER)
-    test = ClickHouseWriter(
+    test = ClickHouseCustomClient(
         clickhouse_client, f"CREATE TABLE IF NOT EXISTS {CLICKHOUSE_DB_NAME}.logs (`datetime` DateTime, `tags` String, `fields` String) ENGINE=StripeLog()")
     # test2 = ClickHouseWriter(clickhouse_client, table_name=f"{CLICKHOUSE_DB_NAME}.logs", values_names=[
     #                          "datetime", "tags", "fields"], timeout_sec=30)
