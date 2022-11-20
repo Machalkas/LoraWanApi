@@ -3,6 +3,7 @@ from utils.logger import Logger
 
 logger = Logger()
 
+
 def log_exceptions(func):
     def wrapper(self, *args, **kargs):
         try:

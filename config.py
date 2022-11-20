@@ -17,6 +17,6 @@ MQTT_HOST = os.getenv("MQTT_HOST") or "localhost"
 MQTT_PORT = os.getenv("MQTT_PORT") or 1883
 MQTT_USERNAME = os.getenv("MQTT_USERNAME") or None
 MQTT_PASSWORD = os.getenv("MQTT_PASSWORD") or None
-MQTT_TOPICKS_TO_SUBSCRIBE = os.getenv("MQTT_TOPICKS_TO_SUBSCRIBE") or ["statistic"]
+MQTT_TOPICS_TO_SUBSCRIBE = os.getenv("MQTT_TOPICKS_TO_SUBSCRIBE") or ["statistic"]
 
 IS_DEBUG = False if os.getenv("DEBUG") == "false".lower() else True

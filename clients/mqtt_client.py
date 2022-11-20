@@ -19,7 +19,7 @@ class MqttClient:
             self.client.set_auth_credentials(username, password)
         self.client.on_message = self.on_message
         self.client.on_connect = self.on_connect
-    
+
     def subscribe(self, topics: Union[str, list], qos: int = 1):
         if isinstance(topics, str):
             topics = [topics]
@@ -33,13 +33,14 @@ class MqttClient:
         logger.debug(f"Connect to mqtt ({self.host}:{self.port})")
         if self.topics_to_subscribe is not None:
             self.subscribe(self.topics_to_subscribe)
-    
+
     async def connect(self):
         await self.client.connect(self.host, self.port)
-    
+
     async def publish(self, topic: str, payload: str, qos: int = 1):
         self.client.publish(topic, payload, qos)
-    
+
+
 if __name__ == "__main__":
     async def test(m: MqttClient):
         while m.client.is_connected is False:

@@ -112,7 +112,7 @@ class ClickHouseWriter(ClickHouseGlobals):
             raise Exception("Insert query values do not match")
         self.values_list.append(values)
 
-    def get(self, *args, get_from_cache: bool = True, **kwargs):
+    def get(self, *args, get_from_cache: bool = True, **kwargs):  # TODO: db_data + cache_data
         # columns = ""
         # for col in self.values_names:
         #     columns += f"%({col})s, "
