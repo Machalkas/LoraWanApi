@@ -112,7 +112,9 @@ class ClickHouseCustomClient(ClickHouseGlobals):
             raise Exception("Insert query values do not match")
         self.values_list.append(values)
 
-    def get(self, columns: list, filter_sql_query: str = None, get_from_buffer: bool = True):
+    def get(self, columns: list = None, filter_sql_query: str = None, get_from_buffer: bool = True):  # TODO: better to return dict
+        if columns is None:
+            columns = self.values_names
         sql_query = f"SELECT {', '.join(columns)} FROM {self.table_name}"
         if filter_sql_query:
             sql_query += f" WHERE {filter_sql_query};"

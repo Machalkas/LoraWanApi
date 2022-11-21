@@ -1,5 +1,6 @@
 import asyncio
-from fastapi import FastAPI
+from datetime import datetime
+from fastapi import FastAPI, HTTPException
 from clients.mqtt_client import MqttClient
 from clickhouse_driver import Client
 from database_drivers.clickHouseClient import ClickHouseCustomClient
@@ -10,9 +11,15 @@ import config
 app = FastAPI()
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+@app.get("/get_statistic/{table}")
+async def get_statistic(table, counter_id: int, from_dt: datetime = None, to_dt: datetime = None):
+    ch_writer = globals.clickhouse_writers.get(table)
+    if ch_writer is None:
+        raise HTTPException(404, f"Table {table} not found")
+    response = ch_writer.get()
+    return {"message": response}
+
+
 
 globals.mqtt_handler = MqttHandler()
 globals.mqtt_client = MqttClient(globals.mqtt_handler, config.MQTT_HOST, config.MQTT_PORT, config.MQTT_USERNAME,
