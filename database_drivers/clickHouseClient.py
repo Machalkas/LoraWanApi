@@ -1,7 +1,7 @@
 import asyncio
 from queue import Queue
 import time
-from typing import Optional
+from typing import List, Optional
 from clickhouse_driver import Client
 import threading
 from utils import logger
@@ -99,7 +99,7 @@ class ClickHouseCustomClient(ClickHouseGlobals):
         self.values_names = values_names
         self.table_name = table_name
         self.alias_name = alias_name
-        self.values_list = []
+        self.values_list: List[dict] = []
         super().__init__(clickhouse_client=clickhouse_client,
                          max_inserts_count=max_inserts_count,
                          min_inserts_count=min_inserts_count,
@@ -107,22 +107,23 @@ class ClickHouseCustomClient(ClickHouseGlobals):
                          child_self=self,
                          alias_name=alias_name if alias_name is not None else table_name)
 
-    def add_values(self, values: dict):
+    def add_values(self, values: dict):  # TODO: add sql injection security
         if type(values) is dict and set([*values]) != set(self.values_names):
             raise Exception("Insert query values do not match")
         self.values_list.append(values)
 
-    def get(self, *args, get_from_cache: bool = True, **kwargs):  # TODO: db_data + cache_data
-        # columns = ""
-        # for col in self.values_names:
-        #     columns += f"%({col})s, "
-        # columns = columns[:-1]
-        # print(columns)
-        response_query = self.clickhouse_client.execute(f"SELECT tags as tag FROM {self.table_name}")
-        list_from_buffer = [{}]
-        # print(response_query)
-        # print(self.values_list)
-        return response_query
+    def get(self, columns: list, filter_sql_query: str = None, get_from_buffer: bool = True):
+        sql_query = f"SELECT {', '.join(columns)} FROM {self.table_name}"
+        if filter_sql_query:
+            sql_query += f" WHERE {filter_sql_query};"
+        data_from_db = self.clickhouse_client.execute(sql_query)
+        if get_from_buffer:  # TODO: add filters
+            data_from_buffer = []
+            for record in self.values_list:
+                record: dict = [(key, record[key]) for key in columns if key in record]
+                data_from_buffer.append(tuple(val for key, val in record if key in columns))
+            return data_from_db+data_from_buffer
+        return data_from_db
 
 
 if __name__ == "__main__":
@@ -131,12 +132,12 @@ if __name__ == "__main__":
                                port=CLICKHOUSE_PORT,
                                user=CLICKHOUSE_USER)
     test = ClickHouseCustomClient(
-        clickhouse_client, f"CREATE TABLE IF NOT EXISTS {CLICKHOUSE_DB_NAME}.logs (`datetime` DateTime, `tags` String, `fields` String) ENGINE=StripeLog()")
+        clickhouse_client, f"CREATE TABLE IF NOT EXISTS {CLICKHOUSE_DB_NAME}.logs (`datetime` DateTime, `tags` String, `fields` String) ENGINE=StripeLog()", timeout_sec=10000, max_inserts_count=10000)
     # test2 = ClickHouseWriter(clickhouse_client, table_name=f"{CLICKHOUSE_DB_NAME}.logs", values_names=[
     #                          "datetime", "tags", "fields"], timeout_sec=30)
 
-    # for i in range(1000):
-    #     test.add_values({"datetime": datetime.now(), "tags": f"tag_1", "fields": f"field_1.{i}"})
+    for i in range(1000):
+        test.add_values({"datetime": datetime.now(), "tags": f"tag_3", "fields": f"field_3.{i}"})
 
     # for i in range(1000, 3000):
     #     test2.add_values({"datetime": datetime.now(), "tags": f"tag_2", "fields": f"field_2.{i}"})
@@ -152,7 +153,7 @@ if __name__ == "__main__":
     #     count += 1
     #     time.sleep(0.2)
 
-    print(test.get())
+    print(test.get(["fields", "tags"], "'tags'!='1235'", get_from_buffer=True))
 
 
 """

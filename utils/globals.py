@@ -5,7 +5,6 @@ from database_drivers.clickHouseClient import ClickHouseCustomClient
 from clickhouse_driver import Client
 
 
-
 class Globals:
     def __init__(self):
         self.mqtt_client: MqttClient = None
