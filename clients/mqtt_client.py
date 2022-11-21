@@ -1,4 +1,5 @@
 import asyncio
+import json
 from typing import Union
 from gmqtt import Client
 from utils import logger
@@ -43,7 +44,9 @@ class MqttClient:
     async def connect(self):
         await self.client.connect(self.host, self.port)
 
-    async def publish(self, topic: str, payload: str, qos: int = 1):
+    async def publish(self, topic: str, payload: Union[str, dict], qos: int = 1):
+        if isinstance(payload, dict):
+            payload = json.dumps(payload)
         self.client.publish(topic, payload, qos)
 
 

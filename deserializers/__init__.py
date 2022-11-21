@@ -69,5 +69,5 @@ class StatisticDeserializer(BaseDeserializer):
         self.data: BaseDeserializer = None
         des = self.statistic_types.get(self.type)
         if des is None:
-            raise DeserializerValueError(f"\"{self.type}\" is wrong type")
+            raise DeserializerValueError(f"unknown type \"{self.type}\"")
         self.data = des(message)

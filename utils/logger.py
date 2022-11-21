@@ -37,7 +37,7 @@ class Logger:
 
     def log(self, message: str, log_type: str, style: str = ""):
         print(f"{datetime.now()} | {style}{'['+log_type+']' if log_type!='' else ''} "
-              f"{message if message.isupper() else message.capitalize()}"
+              f"{message[0].upper()+message[1:]}"
               f"{self.ENDC if style!='' else ''}")
 
 
@@ -51,3 +51,7 @@ if __name__ == "__main__":
     l.info("kek", l.OKCYAN)
     l.info("pek", l.OKGREEN)
     l.info("end", l.UNDERLINE+l.HEADER)
+    print("\n")
+    l.info("QWERTY")
+    l.info("Qwerty")
+    l.info("qWERTY")
