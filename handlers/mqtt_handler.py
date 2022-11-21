@@ -1,4 +1,3 @@
-
 import json
 from deserializers import StatisticDeserializer
 from utils.api import Api
