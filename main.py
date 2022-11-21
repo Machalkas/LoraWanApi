@@ -11,14 +11,13 @@ import config
 app = FastAPI()
 
 
-@app.get("/get_statistic/{table}")
-async def get_statistic(table, counter_id: int, from_dt: datetime = None, to_dt: datetime = None):
-    ch_writer = globals.clickhouse_writers.get(table)
+@app.get("/get_statistic/{metric}")  # TODO: make it not look like shit
+async def get_statistic(metric, counter_id: int, from_dt: datetime = None, to_dt: datetime = None):
+    ch_writer = globals.clickhouse_writers.get(metric)
     if ch_writer is None:
-        raise HTTPException(404, f"Table {table} not found")
+        raise HTTPException(404, f"Metric {metric} not found")
     response = ch_writer.get()
     return {"message": response}
-
 
 
 globals.mqtt_handler = MqttHandler()
