@@ -107,18 +107,20 @@ class ClickHouseCustomClient(ClickHouseGlobals):
                          child_self=self,
                          alias_name=alias_name if alias_name is not None else table_name)
 
-    def add_values(self, values: dict):  # TODO: add sql injection security
+    def add_values(self, values: dict):
         if type(values) is dict and set([*values]) != set(self.values_names):
             raise Exception("Insert query values do not match")
         self.values_list.append(values)
 
-    def get(self, columns: list = None, filter_sql_query: str = None, get_from_buffer: bool = True):  # TODO: better to return dict
+    def get(self, columns: list = None, filter_sql_query: str = None, order_by: str = None, get_from_buffer: bool = True):  # TODO: better to return dict
         if columns is None:
             columns = self.values_names
         sql_query = f"SELECT {', '.join(columns)} FROM {self.table_name}"
         if filter_sql_query:
-            sql_query += f" WHERE {filter_sql_query};"
-        data_from_db = self.clickhouse_client.execute(sql_query)
+            sql_query += f" WHERE {filter_sql_query}"
+        if order_by:
+            sql_query += f" ORDER BY `{order_by.split()[0]}`"
+        data_from_db = self.clickhouse_client.execute(sql_query+";")
         if get_from_buffer:  # TODO: add filters
             data_from_buffer = []
             for record in self.values_list:

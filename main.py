@@ -11,13 +11,18 @@ import config
 app = FastAPI()
 
 
-@app.get("/get_statistic/{metric}")  # TODO: make it not look like shit
-async def get_statistic(metric, counter_id: int, from_dt: datetime = None, to_dt: datetime = None):
+@app.get("/power_monitor/get_statistic/{counter_id}")
+async def get_statistic(counter_id: int, metric: str, from_dt: datetime = None, to_dt: datetime = None):
     ch_writer = globals.clickhouse_writers.get(metric)
     if ch_writer is None:
         raise HTTPException(404, f"Metric {metric} not found")
-    response = ch_writer.get()
-    return {"message": response}
+    filter_query = f"`counter` = {counter_id}"
+    if from_dt:
+        filter_query += f" and `datetime` > '{from_dt}'"
+    if to_dt:
+        filter_query += f" and `datetime` <= '{to_dt}'"
+    response = ch_writer.get(filter_sql_query=filter_query, order_by="datetime")
+    return response
 
 
 globals.mqtt_handler = MqttHandler()
