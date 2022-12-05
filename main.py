@@ -3,7 +3,7 @@ from datetime import datetime
 from fastapi import FastAPI, HTTPException
 from clients.mqtt_client import MqttClient
 from clickhouse_driver import Client
-from database_drivers.clickHouseClient import ClickHouseCustomClient
+from database_clients.click_house_client import ClickHouseCustomClient
 from handlers.mqtt_handler import MqttHandler
 from utils.globals import globals
 import config
