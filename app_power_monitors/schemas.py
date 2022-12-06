@@ -10,9 +10,12 @@ class MonitorRoomSchema(BaseModel):
         orm_mode = True
 
 
-class MonitorRoomCreateSchema(MonitorRoomSchema):
+class MonitorRoomCreateSchema(BaseModel):
     device_serial: str
     room: str
+
+    class Config:
+        orm_mode = True
 
 
 class MonitorSchema(BaseModel):
@@ -25,7 +28,10 @@ class MonitorSchema(BaseModel):
         orm_mode = True
 
 
-class MonitorCreateSchema(MonitorSchema):
+class MonitorCreateSchema(BaseModel):
     device_eui: str
     device_id: str
     is_active: bool
+
+    class Config:
+        orm_mode = True

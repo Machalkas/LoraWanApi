@@ -1,30 +1,15 @@
 import asyncio
-from datetime import datetime
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from clients.mqtt_client import MqttClient
 from clickhouse_driver import Client
 from database_clients.click_house_client import ClickHouseCustomClient
 from handlers.mqtt_handler import MqttHandler
 from utils.globals import globals
 import config
+from app_power_monitors.view import router as power_monitors_router
 
 app = FastAPI()
-
-
-@app.get("/power_monitor/get_statistic/{counter_id}")
-async def get_statistic(counter_id: int, metric: str, from_dt: datetime = None, to_dt: datetime = None):
-    ch_writer = globals.clickhouse_writers.get(metric)
-    if ch_writer is None:
-        raise HTTPException(404, f"Metric {metric} not found")
-    filter_query = f"`counter` = {counter_id}"
-    if from_dt:
-        filter_query += f" and `datetime` > '{from_dt}'"
-    if to_dt:
-        filter_query += f" and `datetime` <= '{to_dt}'"
-    response = ch_writer.get(filter_sql_query=filter_query, order_by="datetime")
-    return response
-
-
+app.include_router(power_monitors_router)
 globals.mqtt_handler = MqttHandler()
 globals.mqtt_client = MqttClient(globals.mqtt_handler, config.MQTT_HOST, config.MQTT_PORT, config.MQTT_USERNAME,
                                  config.MQTT_PASSWORD,
