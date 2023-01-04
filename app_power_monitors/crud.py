@@ -20,3 +20,6 @@ def get_monitor_room_by_device_serial(db: Session, device_serial: str):
 
 def get_monitor_room_list(db: Session):
     return db.query(models.MonitorRoom).all()
+
+def get_monitor_list(db: Session):
+    return db.query(models.Monitor).all()

@@ -112,7 +112,8 @@ class ClickHouseCustomClient(ClickHouseGlobals):
             raise Exception("Insert query values do not match")
         self.values_list.append(values)
 
-    def get(self, columns: list = None, filter_sql_query: str = None, order_by: str = None, get_from_buffer: bool = True):  # TODO: better to return dict
+    def get(self, columns: list = None, filter_sql_query: str = None, order_by: str = None,
+            get_from_buffer: bool = True, limit: int = None):  # TODO: better to return dict
         if columns is not None:
             columns = [col for col in columns if col in self.columns_names]
         if not columns:
@@ -124,6 +125,9 @@ class ClickHouseCustomClient(ClickHouseGlobals):
             sql_query += f" WHERE {filter_sql_query}"
         if order_by:
             sql_query += f" ORDER BY `{order_by.split()[0]}`"
+        if limit and limit > 0:
+            sql_query += f"LIMIT {limit}"
+
         data_from_db = self.clickhouse_client.execute(sql_query+";")
         data_response["from_db"] = data_from_db
 

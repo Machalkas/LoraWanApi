@@ -19,12 +19,17 @@ def get_db():
         db.close()
 
 
-@router.get("/power_monitor/get_statistic/{counter_id}")
-async def get_statistic(counter_id: int, metric: str, from_dt: datetime = None, to_dt: datetime = None,
-                        columns: str = None):
+def get_clickhouse_writer_or_raise(metric):
     ch_writer = globals.clickhouse_writers.get(metric)
     if ch_writer is None:
         raise HTTPException(404, f"Metric {metric} not found")
+    return ch_writer
+
+
+@router.get("/power_monitor/get_statistic/{counter_id}", response_model=schemas.StatisticSchema)
+async def get_statistic(counter_id: int, metric: str, from_dt: datetime = None, to_dt: datetime = None,
+                        columns: str = None, limit: int = None):
+    ch_writer = get_clickhouse_writer_or_raise(metric)
     filter_query = f"`counter` = {counter_id}"
     if from_dt:
         filter_query += f" and `datetime` > '{from_dt}'"
@@ -33,10 +38,14 @@ async def get_statistic(counter_id: int, metric: str, from_dt: datetime = None, 
     if columns is not None:
         columns = columns.split(",")
         columns = [col.strip() for col in columns]
+    response = ch_writer.get(filter_sql_query=filter_query, order_by="datetime", columns=columns,  limit=limit)
+    return schemas.StatisticSchema(**response)
 
-    ch_writer.add_values({"datetime": datetime.now(), "counter": 4101469, "phase_a": 123, "phase_b": 456, "phase_c": 789, "total": 123456789})
-    response = ch_writer.get(filter_sql_query=filter_query, order_by="datetime", columns=columns,  get_from_buffer=True)
-    return response
+
+@router.get("/power_monitor/get_last_statistic/{counter_id}")
+async def get_last_statistic(counter_id: int, metric: str, rows_number: int = 1):
+    ch_writer = get_clickhouse_writer_or_raise(metric)
+
 
 
 @router.post("/power_monitor/add_monitor_room", response_model=schemas.MonitorRoomSchema)
@@ -50,3 +59,8 @@ async def create_monitor_room(monitor_room: schemas.MonitorRoomCreateSchema, db:
 @router.get("/power_monitor/get_monitors_rooms_list", response_model=list[schemas.MonitorRoomSchema])
 async def get_monitors_rooms_list(db: Session = Depends(get_db)):
     return crud.get_monitor_room_list(db)
+
+
+@router.get("/power_monitor/get_monitors", response_model=list[schemas.MonitorSchema])
+async def get_monitors_list(db: Session = Depends(get_db)):
+    return crud.get_monitor_list(db)
