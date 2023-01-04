@@ -20,7 +20,8 @@ def get_db():
 
 
 @router.get("/power_monitor/get_statistic/{counter_id}")
-async def get_statistic(counter_id: int, metric: str, from_dt: datetime = None, to_dt: datetime = None):
+async def get_statistic(counter_id: int, metric: str, from_dt: datetime = None, to_dt: datetime = None,
+                        columns: str = None):
     ch_writer = globals.clickhouse_writers.get(metric)
     if ch_writer is None:
         raise HTTPException(404, f"Metric {metric} not found")
@@ -29,7 +30,12 @@ async def get_statistic(counter_id: int, metric: str, from_dt: datetime = None, 
         filter_query += f" and `datetime` > '{from_dt}'"
     if to_dt:
         filter_query += f" and `datetime` <= '{to_dt}'"
-    response = ch_writer.get(filter_sql_query=filter_query, order_by="datetime")
+    if columns is not None:
+        columns = columns.split(",")
+        columns = [col.strip() for col in columns]
+
+    ch_writer.add_values({"datetime": datetime.now(), "counter": 4101469, "phase_a": 123, "phase_b": 456, "phase_c": 789, "total": 123456789})
+    response = ch_writer.get(filter_sql_query=filter_query, order_by="datetime", columns=columns,  get_from_buffer=True)
     return response
 
 

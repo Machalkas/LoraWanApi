@@ -96,7 +96,7 @@ class ClickHouseCustomClient(ClickHouseGlobals):
 
         self.max_inserts_count = max_inserts_count
         self.query = f"INSERT INTO {table_name} ({', '.join(values_names)}) VALUES"
-        self.values_names = values_names
+        self.columns_names = values_names
         self.table_name = table_name
         self.alias_name = alias_name
         self.values_list: List[dict] = []
@@ -108,26 +108,32 @@ class ClickHouseCustomClient(ClickHouseGlobals):
                          alias_name=alias_name if alias_name is not None else table_name)
 
     def add_values(self, values: dict):
-        if type(values) is dict and set([*values]) != set(self.values_names):
+        if type(values) is dict and set([*values]) != set(self.columns_names):
             raise Exception("Insert query values do not match")
         self.values_list.append(values)
 
     def get(self, columns: list = None, filter_sql_query: str = None, order_by: str = None, get_from_buffer: bool = True):  # TODO: better to return dict
-        if columns is None:
-            columns = self.values_names
+        if columns is not None:
+            columns = [col for col in columns if col in self.columns_names]
+        if not columns:
+            columns = self.columns_names
+        data_response = {"labels": columns, "from_db": None, "from_buffer": None}
+
         sql_query = f"SELECT {', '.join(columns)} FROM {self.table_name}"
         if filter_sql_query:
             sql_query += f" WHERE {filter_sql_query}"
         if order_by:
             sql_query += f" ORDER BY `{order_by.split()[0]}`"
         data_from_db = self.clickhouse_client.execute(sql_query+";")
-        if get_from_buffer:  # TODO: add filters
+        data_response["from_db"] = data_from_db
+
+        if get_from_buffer:  # TODO: add filters query support
             data_from_buffer = []
             for record in self.values_list:
                 record: dict = [(key, record[key]) for key in columns if key in record]
                 data_from_buffer.append(tuple(val for key, val in record if key in columns))
-            return data_from_db+data_from_buffer
-        return data_from_db
+            data_response["from_buffer"] = data_from_buffer
+        return data_response
 
 
 if __name__ == "__main__":
