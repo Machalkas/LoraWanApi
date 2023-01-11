@@ -7,8 +7,8 @@ from database_clients.postgres_client import Base
 class MonitorRoom(Base):
     __tablename__ = "monitors_rooms"
     id = Column(Integer, primary_key=True, index=True)
-    device_serial = Column(String, unique=True)
-    room = Column(String)
+    device_serial = Column(String(100), unique=True)
+    room = Column(String(20))
 
     monitor = relationship("Monitor", back_populates="monitor_room")
 

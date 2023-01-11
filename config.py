@@ -1,25 +1,29 @@
 import os
 
+SECRET_KEY = os.getenv("SECRET_KEY", "very_secret_key")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
 
-PGSQL_HOST = os.getenv("PGSQL_HOST") or "localhost"
-PGSQL_PORT = os.getenv("PGSQL_PORT") or "5432"
-PGSQL_USER = os.getenv("PGSQL_USER") or "admin"
-PGSQL_PASSWORD = os.getenv("PGSQL_PASSWORD") or "iotlab"
-PGSQL_DB_NAME = os.getenv("PGSQL_DB_NAME") or "vega"
 
-CLICKHOUSE_DB_NAME = os.getenv("CLICKHOUSE_DB_NAME") or "vega"
-CLICKHOUSE_HOST = os.getenv("CLICKHOUSE_HOST") or "localhost"
-CLICKHOUSE_PORT = os.getenv("CLICKHOUSE_PORT") or "19000"
-CLICKHOUSE_USER = os.getenv("CLICKHOUSE_USER") or "default"
-CLICKHOUSE_PASSWORD = os.getenv("CLICKHOUSE_PASSWORD") or None
-CLICKHOUSE_MAX_COUNT = int(os.getenv("CLICKHOUSE_MAX_COUNT") or 1000)
-CLICKHOUSE_TIMEOUT = int(os.getenv("CLICKHOUSE_TIMEOUT") or 30)
+PGSQL_HOST = os.getenv("PGSQL_HOST", "localhost")
+PGSQL_PORT = os.getenv("PGSQL_PORT", "5432")
+PGSQL_USER = os.getenv("PGSQL_USER", "admin")
+PGSQL_PASSWORD = os.getenv("PGSQL_PASSWORD", "iotlab")
+PGSQL_DB_NAME = os.getenv("PGSQL_DB_NAME", "vega")
 
-MQTT_HOST = os.getenv("MQTT_HOST") or "localhost"
-MQTT_PORT = int(os.getenv("MQTT_PORT") or 1883)
-MQTT_USERNAME = os.getenv("MQTT_USERNAME") or None
-MQTT_PASSWORD = os.getenv("MQTT_PASSWORD") or None
-MQTT_TOPICS_TO_SUBSCRIBE = os.getenv("MQTT_TOPICKS_TO_SUBSCRIBE") or ["statistic", "device/#"]
+CLICKHOUSE_DB_NAME = os.getenv("CLICKHOUSE_DB_NAME", "vega")
+CLICKHOUSE_HOST = os.getenv("CLICKHOUSE_HOST", "localhost")
+CLICKHOUSE_PORT = os.getenv("CLICKHOUSE_PORT", "19000")
+CLICKHOUSE_USER = os.getenv("CLICKHOUSE_USER", "default")
+CLICKHOUSE_PASSWORD = os.getenv("CLICKHOUSE_PASSWORD")
+CLICKHOUSE_MAX_COUNT = int(os.getenv("CLICKHOUSE_MAX_COUNT", 1000))
+CLICKHOUSE_TIMEOUT = int(os.getenv("CLICKHOUSE_TIMEOUT", 30))
+
+MQTT_HOST = os.getenv("MQTT_HOST", "localhost")
+MQTT_PORT = int(os.getenv("MQTT_PORT", 1883))
+MQTT_USERNAME = os.getenv("MQTT_USERNAME")
+MQTT_PASSWORD = os.getenv("MQTT_PASSWORD")
+MQTT_TOPICS_TO_SUBSCRIBE = [ topic.strip() for topic in os.getenv("MQTT_TOPICKS_TO_SUBSCRIBE", "statistic, device/#").split(",")]
 
 IS_DEBUG = False if os.getenv("DEBUG") == "false".lower() else True
 

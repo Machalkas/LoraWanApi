@@ -22,6 +22,9 @@ class MqttClient:
             self.client.set_auth_credentials(username, password)
         self.client.on_message = self.on_message
         self.client.on_connect = self.on_connect
+        self.client.on_disconnect = self.on_disconnect
+        self.client.on_subscribe = self.on_subscribe
+        self.client.on_unsubscribe = self.on_unsubscribe
 
     def subscribe(self, topics: Union[str, list], qos: int = 1):
         if isinstance(topics, str):
@@ -36,13 +39,30 @@ class MqttClient:
         result = asyncio.ensure_future(self.handler.handle_request(payload, topic), loop=self.event_loop)
 
     def on_connect(self, client, flags, rc, properties):
-        logger.debug(f"Connect to mqtt ({self.host}:{self.port})")
+        logger.info(f"Connect to mqtt broker ({self.host}:{self.port})")
         self.event_loop = asyncio.get_event_loop()
         if self.topics_to_subscribe is not None:
             self.subscribe(self.topics_to_subscribe)
 
+    def on_disconnect(self, *args, **kwargs):
+        logger.warning(f"Disconnect from mqtt broker ({self.host}:{self.port})")
+
+    def on_subscribe(self, client: Client, mid, qos, properties):
+        topic = client.get_subscriptions_by_mid(mid)
+        logger.debug(f"Subscribe to topic '{topic[0].topic}'")
+
+    def on_unsubscribe(self, client: Client, mid, qos, properties):
+        topic = client.get_subscriptions_by_mid(mid)
+        logger.debug(f"Unsubscribe from topic '{topic}'")
+
     async def connect(self):
-        await self.client.connect(self.host, self.port)
+        try:
+            await self.client.connect(self.host, self.port)
+        except Exception as ex:
+            logger.error(f"Fail to connect to mqtt: {ex}")
+            await self.client.disconnect()
+            await asyncio.sleep(3)
+            await self.connect()
 
     async def publish(self, topic: str, payload: Union[str, dict], qos: int = 1):
         if isinstance(payload, dict):
