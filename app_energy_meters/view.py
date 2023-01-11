@@ -48,9 +48,11 @@ async def get_last_statistic(counter_id: int, metric: str, rows_number: int = 1)
 
 @router.post("/energy_meter/add_energy_meter_room", response_model=schemas.EnergyMeterRoomSchema)
 async def create_energy_meter_room(energy_meter_room: schemas.EnergyMeterRoomCreateSchema, db: Session = Depends(get_db)):
-    db_energy_meter_room = crud.get_energy_meter_room_by_device_serial(db, device_serial=energy_meter_room.device_serial)
+    db_energy_meter_room = crud.get_energy_meter_room_by_device_serial(db,
+                                                                       device_serial=energy_meter_room.device_serial)
     if db_energy_meter_room:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="EnergyMeter with this device_serial already exist")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT,
+                            detail="EnergyMeter with this device_serial already exist")
     return crud.create_energy_meter_room(db, energy_meter_room)
 
 
