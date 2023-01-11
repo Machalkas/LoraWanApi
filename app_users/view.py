@@ -28,6 +28,16 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 @router.post("/users/registration", response_model=schemas.UserSchema)
 async def user_registration(new_user: schemas.UserRegistrationSchema, db: Session = Depends(utils.get_db)):
+    if new_user.email is not None and crud.is_email_exists(db, new_user.email):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already exists"
+        )
+    if crud.is_username_exists(db, new_user.username):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username already exists"
+        )
     hashed_pass = utils.get_password_hash(new_user.password)
     return crud.create_user(db, schemas.UserSchema(username=new_user.username, email=new_user.email),
                             hashed_password=hashed_pass)

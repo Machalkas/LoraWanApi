@@ -16,3 +16,20 @@ class UserSchema(BaseModel):
 
 class UserRegistrationSchema(UserSchema):
     password: str
+
+
+class UsersEnergyMetersSchema(BaseModel):
+    id: int
+    user_username: str
+    energy_meter_id: int
+
+    class Config:
+        orm_mode = True
+
+
+class UsersEnergyMetersCreateSchema(BaseModel):
+    user_username: str
+    energy_meter_id: int
+
+    class Config:
+        orm_mode = True
