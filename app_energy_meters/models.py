@@ -1,5 +1,6 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import relationship
+from app_users.models import User
 
 from database_clients.postgres_client import Base
 
@@ -26,11 +27,11 @@ class EnergyMeter(Base):
 
 class EnergyMetersAccess(Base):
     __tablename__ = "energy_meters_access"
+    __table_args__ = (UniqueConstraint("user_username", "energy_meter_id", name="user_energy_meter_uniq"),)
 
     id = Column(Integer, primary_key=True, index=True)
     user_username = Column(String, ForeignKey("users.username", ondelete="CASCADE"), nullable=False)
     energy_meter_id = Column(Integer, ForeignKey("energy_meters.id", ondelete="CASCADE"), nullable=False)
-    UniqueConstraint("user_username", "energy_meter_id", name="user_energy_meter_uniq")
 
     energy_meter = relationship("EnergyMeter", back_populates="energy_meters_access")
     user = relationship("User", back_populates="energy_meters_access")
