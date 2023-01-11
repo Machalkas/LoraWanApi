@@ -20,11 +20,3 @@ def is_username_exists(db: Session, username: str) -> bool:
 
 def is_email_exists(db: Session, email: str) -> bool:
     return True if db.query(models.User).filter(models.User.email == email).scalar() is not None else False
-
-
-def create_user_energy_meter(db: Session, user_energy_meter: schemas.UsersEnergyMetersCreateSchema) -> models.UsersEnergyMeters:
-    db_user_energy_meter = models.UsersEnergyMeters(user_energy_meter)
-    db.add(db_user_energy_meter)
-    db.commit()
-    db.refresh(db_user_energy_meter)
-    return db_user_energy_meter

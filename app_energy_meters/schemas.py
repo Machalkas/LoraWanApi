@@ -51,3 +51,20 @@ class StatisticSchema(BaseModel):
                 "from_buffer": [["2023-01-05T00:21:00.620792", 4101469, 123, 456, 789, 123456789]],
             }
         }
+
+
+class UsersEnergyMetersSchema(BaseModel):
+    id: int
+    user_username: str
+    energy_meter_id: int
+
+    class Config:
+        orm_mode = True
+
+
+class UsersEnergyMetersCreateSchema(BaseModel):
+    user_username: str
+    energy_meter_id: int
+
+    class Config:
+        orm_mode = True

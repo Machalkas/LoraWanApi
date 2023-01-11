@@ -22,3 +22,14 @@ class EnergyMeter(Base):
 
     energy_meter_room = relationship("EnergyMeterRoom", back_populates="energy_meter")
     user_energy_meter = relationship("UsersEnergyMeters", back_populates="energy_meter")
+
+
+class UsersEnergyMeters(Base):
+    __tablename__ = "users_energy_meters"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_username = Column(String, ForeignKey("users.username"))
+    energy_meter_id = Column(Integer, ForeignKey("energy_meters.id"))
+
+    energy_meter = relationship("EnergyMeter", back_populates="user_energy_meter")
+    user = relationship("User", back_populates="user_energy_meter")

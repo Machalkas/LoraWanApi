@@ -22,5 +22,14 @@ def get_energy_meter_room_by_device_serial(db: Session, device_serial: str):
 def get_energy_meter_room_list(db: Session):
     return db.query(models.EnergyMeterRoom).all()
 
+
 def get_energy_meter_list(db: Session):
     return db.query(models.EnergyMeter).all()
+
+
+def create_user_energy_meter(db: Session, user_energy_meter: schemas.UsersEnergyMetersCreateSchema) -> models.UsersEnergyMeters:
+    db_user_energy_meter = models.UsersEnergyMeters(user_energy_meter)
+    db.add(db_user_energy_meter)
+    db.commit()
+    db.refresh(db_user_energy_meter)
+    return db_user_energy_meter
