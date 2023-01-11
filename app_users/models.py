@@ -12,6 +12,8 @@ class User(Base):
     email = Column(String(100), unique=True, nullable=True)
     hashed_password = Column(String(200), nullable=False)
 
+    user_energy_meter = relationship("UsersEnergyMeters", back_populates="user")
+
 
 class UsersEnergyMeters(Base):
     __tablename__ = "users_energy_meters"
@@ -20,5 +22,5 @@ class UsersEnergyMeters(Base):
     user_username = Column(String, ForeignKey("users.username"))
     energy_meter_id = Column(Integer, ForeignKey("energy_meters.id"))
 
-    energy_meter = relationship("EnergyMeter", back_populates="users_energy_meters")
-    user = relationship("User", back_populates="users_energy_meters")
+    energy_meter = relationship("EnergyMeter", back_populates="user_energy_meter")
+    user = relationship("User", back_populates="user_energy_meter")

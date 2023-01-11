@@ -10,7 +10,7 @@ class EnergyMeterRoom(Base):
     device_serial = Column(String(100), unique=True)
     room = Column(String(20))
 
-    energy_meter = relationship("EnergyMeter", back_populates="energy_meter_rooms")
+    energy_meter = relationship("EnergyMeter", back_populates="energy_meter_room")
 
 
 class EnergyMeter(Base):
@@ -20,4 +20,5 @@ class EnergyMeter(Base):
     device_id = Column(Integer, ForeignKey("energy_meter_rooms.id"), default=None)
     is_active = Column(Boolean, default=True)
 
-    energy_meter_room = relationship("EnergyMeterRoom", back_populates="energy_meters")
+    energy_meter_room = relationship("EnergyMeterRoom", back_populates="energy_meter")
+    user_energy_meter = relationship("UsersEnergyMeters", back_populates="energy_meter")
