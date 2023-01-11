@@ -25,7 +25,7 @@ def get_clickhouse_writer_or_raise(metric):
     return ch_writer
 
 
-@router.get("/power_monitor/get_statistic/{counter_id}", response_model=schemas.StatisticSchema)
+@router.get("/energy_meter/get_statistic/{counter_id}", response_model=schemas.StatisticSchema)
 async def get_statistic(counter_id: int, metric: str, from_dt: datetime = None, to_dt: datetime = None,
                         columns: str = None, limit: int = None):
     ch_writer = get_clickhouse_writer_or_raise(metric)
@@ -41,24 +41,24 @@ async def get_statistic(counter_id: int, metric: str, from_dt: datetime = None, 
     return schemas.StatisticSchema(**response)
 
 
-@router.get("/power_monitor/get_last_statistic/{counter_id}")
+@router.get("/energy_meter/get_last_statistic/{counter_id}")
 async def get_last_statistic(counter_id: int, metric: str, rows_number: int = 1):
     ch_writer = get_clickhouse_writer_or_raise(metric)
 
 
-@router.post("/power_monitor/add_monitor_room", response_model=schemas.MonitorRoomSchema)
-async def create_monitor_room(monitor_room: schemas.MonitorRoomCreateSchema, db: Session = Depends(get_db)):
-    db_monitor_room = crud.get_monitor_room_by_device_serial(db, device_serial=monitor_room.device_serial)
-    if db_monitor_room:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Monitor with this device_serial already exist")
-    return crud.create_monitor_room(db, monitor_room)
+@router.post("/energy_meter/add_energy_meter_room", response_model=schemas.EnergyMeterRoomSchema)
+async def create_energy_meter_room(energy_meter_room: schemas.EnergyMeterRoomCreateSchema, db: Session = Depends(get_db)):
+    db_energy_meter_room = crud.get_energy_meter_room_by_device_serial(db, device_serial=energy_meter_room.device_serial)
+    if db_energy_meter_room:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="EnergyMeter with this device_serial already exist")
+    return crud.create_energy_meter_room(db, energy_meter_room)
 
 
-@router.get("/power_monitor/get_monitors_rooms_list", response_model=list[schemas.MonitorRoomSchema])
-async def get_monitors_rooms_list(db: Session = Depends(get_db)):
-    return crud.get_monitor_room_list(db)
+@router.get("/energy_meter/get_energy_meters_rooms_list", response_model=list[schemas.EnergyMeterRoomSchema])
+async def get_energy_meters_rooms_list(db: Session = Depends(get_db)):
+    return crud.get_energy_meter_room_list(db)
 
 
-@router.get("/power_monitor/get_monitors", response_model=list[schemas.MonitorSchema])
-async def get_monitors_list(db: Session = Depends(get_db)):
-    return crud.get_monitor_list(db)
+@router.get("/energy_meter/get_energy_meters", response_model=list[schemas.EnergyMeterSchema])
+async def get_energy_meters_list(db: Session = Depends(get_db)):
+    return crud.get_energy_meter_list(db)

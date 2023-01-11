@@ -6,11 +6,11 @@ from database_clients.click_house_client import ClickHouseCustomClient
 from handlers.mqtt_handler import MqttHandler
 from utils.globals import globals
 import config
-from app_power_monitors.view import router as power_monitors_router
+from app_energy_meters.view import router as energy_meters_router
 from app_users.view import router as users_router
 
 app = FastAPI()
-app.include_router(power_monitors_router)
+app.include_router(energy_meters_router)
 app.include_router(users_router)
 globals.mqtt_handler = MqttHandler()
 globals.mqtt_client = MqttClient(globals.mqtt_handler, config.MQTT_HOST, config.MQTT_PORT, config.MQTT_USERNAME,

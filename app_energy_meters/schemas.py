@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class MonitorRoomSchema(BaseModel):
+class EnergyMeterRoomSchema(BaseModel):
     id: int
     device_serial: str
     room: str
@@ -10,7 +10,7 @@ class MonitorRoomSchema(BaseModel):
         orm_mode = True
 
 
-class MonitorRoomCreateSchema(BaseModel):
+class EnergyMeterRoomCreateSchema(BaseModel):
     device_serial: str
     room: str
 
@@ -18,7 +18,7 @@ class MonitorRoomCreateSchema(BaseModel):
         orm_mode = True
 
 
-class MonitorSchema(BaseModel):
+class EnergyMeterSchema(BaseModel):
     id: int
     device_eui: str
     device_id: str
@@ -28,7 +28,7 @@ class MonitorSchema(BaseModel):
         orm_mode = True
 
 
-class MonitorCreateSchema(BaseModel):
+class EnergyMeterCreateSchema(BaseModel):
     device_eui: str
     device_id: str
     is_active: bool
