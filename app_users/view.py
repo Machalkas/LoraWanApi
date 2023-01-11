@@ -27,16 +27,12 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 
 @router.post("/users/registration", response_model=schemas.UserSchema)
-async def user_registration(new_user=schemas.UserCreationSchema, db: Session = Depends(utils.get_db)):
+async def user_registration(new_user: schemas.UserRegistrationSchema, db: Session = Depends(utils.get_db)):
     hashed_pass = utils.get_password_hash(new_user.password)
-    return crud.create_user(db, schemas.UserCreationSchema(username=new_user.username, hashed_password=hashed_pass))
+    return crud.create_user(db, schemas.UserSchema(username=new_user.username, email=new_user.email),
+                            hashed_password=hashed_pass)
 
 
 @router.get("/users/me/", response_model=schemas.UserSchema)
 async def read_users_me(current_user: models.User = Depends(utils.get_current_user)):
     return current_user
-
-
-@router.get("/users/me/items/")
-async def read_own_items(current_user: schemas.UserSchema = Depends(utils.get_current_user)):
-    return [{"item_id": "Foo", "owner": current_user.username}]

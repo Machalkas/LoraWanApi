@@ -14,5 +14,5 @@ class UserSchema(BaseModel):
         orm_mode = True
 
 
-class UserCreationSchema(UserSchema):
-    hashed_password: str
+class UserRegistrationSchema(UserSchema):
+    password: str
