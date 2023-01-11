@@ -27,9 +27,33 @@ def get_energy_meter_list(db: Session):
     return db.query(models.EnergyMeter).all()
 
 
-def create_user_energy_meter(db: Session, user_energy_meter: schemas.UsersEnergyMetersCreateSchema) -> models.UsersEnergyMeters:
+def add_energy_meters_access(db: Session, user_energy_meter: schemas.EnergyMetersAccessCreateSchema) -> models.EnergyMetersAccess:
     db_user_energy_meter = models.UsersEnergyMeters(user_energy_meter)
     db.add(db_user_energy_meter)
     db.commit()
     db.refresh(db_user_energy_meter)
     return db_user_energy_meter
+
+
+def remove_energy_meters_access(db: Session, username: str, energy_meter_id: int):
+    energy_meter = db.query(models.UsersEnergyMeters).filter(
+        models.UsersEnergyMeters.user_username == username,
+        models.UsersEnergyMeters.energy_meter_id == energy_meter_id
+    ).scalar()
+    db.delete(energy_meter)
+
+
+def check_energy_meters_access(db: Session, username: str, energy_meter_id: int) -> bool:
+    energy_meter = db.query(models.UsersEnergyMeters).filter(
+        models.UsersEnergyMeters.user_username == username,
+        models.UsersEnergyMeters.energy_meter_id == energy_meter_id
+    ).scalar()
+    return True if energy_meter is not None else False
+
+
+def get_energy_meters_access_by_username(db: Session, username: str) -> list[models.EnergyMetersAccess]:
+    return db.query(models.EnergyMetersAccess.user_username == username).all()
+
+
+def get_energy_meters_access_by_energy_meter_id(db: Session, energy_meter_id: int) -> list[models.EnergyMetersAccess]:
+    return db.query(models.EnergyMetersAccess.energy_meter_id == energy_meter_id).all()

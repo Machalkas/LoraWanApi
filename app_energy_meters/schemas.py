@@ -53,7 +53,7 @@ class StatisticSchema(BaseModel):
         }
 
 
-class UsersEnergyMetersSchema(BaseModel):
+class EnergyMetersAccessSchema(BaseModel):
     id: int
     user_username: str
     energy_meter_id: int
@@ -62,7 +62,7 @@ class UsersEnergyMetersSchema(BaseModel):
         orm_mode = True
 
 
-class UsersEnergyMetersCreateSchema(BaseModel):
+class EnergyMetersAccessCreateSchema(BaseModel):
     user_username: str
     energy_meter_id: int
 

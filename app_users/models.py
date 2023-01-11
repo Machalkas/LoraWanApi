@@ -12,4 +12,4 @@ class User(Base):
     email = Column(String(100), unique=True, nullable=True)
     hashed_password = Column(String(200), nullable=False)
 
-    user_energy_meter = relationship("UsersEnergyMeters", back_populates="user")
+    energy_meters_access = relationship("EnergyMetersAccess", back_populates="user")
