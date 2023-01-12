@@ -27,4 +27,3 @@ globals.clickhouse_writers["traffic"] = ClickHouseCustomClient(globals.clickhous
                                                                timeout_sec=config.CLICKHOUSE_TIMEOUT)
 event_loop = asyncio.get_event_loop()
 event_loop.create_task(globals.mqtt_client.connect())
-# event_loop.run_forever()

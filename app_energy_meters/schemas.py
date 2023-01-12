@@ -21,7 +21,7 @@ class EnergyMeterRoomCreateSchema(BaseModel):
 class EnergyMeterSchema(BaseModel):
     id: int
     device_eui: str
-    device_id: str
+    device: str
     is_active: bool
 
     class Config:
@@ -30,7 +30,7 @@ class EnergyMeterSchema(BaseModel):
 
 class EnergyMeterCreateSchema(BaseModel):
     device_eui: str
-    device_id: str
+    device: str
     is_active: bool
 
     class Config:
@@ -56,7 +56,7 @@ class StatisticSchema(BaseModel):
 class EnergyMetersAccessSchema(BaseModel):
     id: int
     user_username: str
-    energy_meter_id: int
+    energy_meter: int
 
     class Config:
         orm_mode = True
@@ -64,7 +64,7 @@ class EnergyMetersAccessSchema(BaseModel):
 
 class EnergyMetersAccessCreateSchema(BaseModel):
     user_username: str
-    energy_meter_id: int
+    energy_meter: int
 
     class Config:
         orm_mode = True

@@ -6,13 +6,26 @@ class TokenSchema(BaseModel):
     token_type: str
 
 
-class UserSchema(BaseModel):
-    username: str
-    email: str | None
+class RoleSchema(BaseModel):
+    name: str
 
     class Config:
         orm_mode = True
 
 
-class UserRegistrationSchema(UserSchema):
+class UserSchema(BaseModel):
+    username: str
+    email: str | None
+    role: str
+
+    class Config:
+        orm_mode = True
+
+
+class UserRegistrationSchema(BaseModel):
+    username: str
+    email: str | None
     password: str
+
+    class Config:
+        orm_mode = True

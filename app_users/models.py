@@ -11,15 +11,15 @@ class User(Base):
     username = Column(String(100), primary_key=True, unique=True)
     email = Column(String(100), unique=True, nullable=True)
     hashed_password = Column(String(200), nullable=False)
-    role_fk = Column(String, ForeignKey("roles.name", ondelete="RESTRICT"), nullable=False)
+    role = Column(String, ForeignKey("roles.name", ondelete="RESTRICT"), nullable=False)
 
-    energy_meters_access = relationship("EnergyMetersAccess", back_populates="user")
-    role = relationship("Role", back_populates="user")
+    energy_meters_access_relation = relationship("EnergyMetersAccess", back_populates="user_relation")
+    role_relation = relationship("Role", back_populates="user_relation")
 
 
 class Role(Base):
     __tablename__ = "roles"
 
-    name = Column(String(10), primary_key=True, unique=True)
+    name = Column(String, primary_key=True, unique=True)
 
-    user = relationship("User", back_populates="role")
+    user_relation = relationship("User", back_populates="role_relation")
