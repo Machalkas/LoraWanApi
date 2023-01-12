@@ -64,3 +64,15 @@ async def get_energy_meters_rooms_list(db: Session = Depends(get_db)):
 @router.get("/energy_meter/get_energy_meters", response_model=list[schemas.EnergyMeterSchema])
 async def get_energy_meters_list(db: Session = Depends(get_db)):
     return crud.get_energy_meter_list(db)
+
+
+@router.post("/energy_meter_access", response_model=schemas.EnergyMetersAccessSchema)
+async def create_energy_meter_access(energy_meter_access: schemas.EnergyMetersAccessCreateSchema,
+                                     db: Session = Depends(get_db)):
+    if crud.is_energy_meters_access_exists(db, energy_meter_access.user,
+                                           energy_meter_access.energy_meter):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Energy_meter_access already exists"
+        )
+    return crud.add_energy_meters_access(db, energy_meter_access)

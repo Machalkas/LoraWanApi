@@ -28,7 +28,8 @@ def get_energy_meter_list(db: Session):
 
 
 def add_energy_meters_access(db: Session, user_energy_meter: schemas.EnergyMetersAccessCreateSchema) -> models.EnergyMetersAccess:
-    db_user_energy_meter = models.UsersEnergyMeters(user_energy_meter)
+    db_user_energy_meter = models.EnergyMetersAccess(user=user_energy_meter.user,
+                                                     energy_meter=user_energy_meter.energy_meter)
     db.add(db_user_energy_meter)
     db.commit()
     db.refresh(db_user_energy_meter)
@@ -36,24 +37,24 @@ def add_energy_meters_access(db: Session, user_energy_meter: schemas.EnergyMeter
 
 
 def remove_energy_meters_access(db: Session, username: str, energy_meter_id: int):
-    energy_meter = db.query(models.UsersEnergyMeters).filter(
-        models.UsersEnergyMeters.user_username == username,
-        models.UsersEnergyMeters.energy_meter_id == energy_meter_id
+    energy_meter = db.query(models.EnergyMetersAccess).filter(
+        models.EnergyMetersAccess.user == username,
+        models.EnergyMetersAccess.energy_meter == energy_meter_id
     ).scalar()
     db.delete(energy_meter)
 
 
-def check_energy_meters_access(db: Session, username: str, energy_meter_id: int) -> bool:
-    energy_meter = db.query(models.UsersEnergyMeters).filter(
-        models.UsersEnergyMeters.user_username == username,
-        models.UsersEnergyMeters.energy_meter_id == energy_meter_id
+def is_energy_meters_access_exists(db: Session, username: str, energy_meter_id: int) -> bool:
+    energy_meter = db.query(models.EnergyMetersAccess).filter(
+        models.EnergyMetersAccess.user == username,
+        models.EnergyMetersAccess.energy_meter == energy_meter_id
     ).scalar()
     return True if energy_meter is not None else False
 
 
 def get_energy_meters_access_by_username(db: Session, username: str) -> list[models.EnergyMetersAccess]:
-    return db.query(models.EnergyMetersAccess.user_username == username).all()
+    return db.query(models.EnergyMetersAccess.user == username).all()
 
 
 def get_energy_meters_access_by_energy_meter_id(db: Session, energy_meter_id: int) -> list[models.EnergyMetersAccess]:
-    return db.query(models.EnergyMetersAccess.energy_meter_id == energy_meter_id).all()
+    return db.query(models.EnergyMetersAccess.energy_meter == energy_meter_id).all()
