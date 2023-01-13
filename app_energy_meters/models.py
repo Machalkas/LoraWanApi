@@ -21,6 +21,9 @@ class EnergyMeter(Base):
 
     energy_meters_access_relation = relationship("EnergyMetersAccess", back_populates="energy_meter_relation")
 
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 class EnergyMetersAccess(Base):
     __tablename__ = "energy_meters_access"

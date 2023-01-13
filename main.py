@@ -14,10 +14,10 @@ global_prefix = "/api"
 app = FastAPI()
 app.include_router(energy_meters_router, prefix=global_prefix)
 app.include_router(users_router, prefix=global_prefix)
+globals.mqtt_handler = MqttHandler()
 globals.mqtt_client = MqttClient(globals.mqtt_handler, config.MQTT_HOST, config.MQTT_PORT, config.MQTT_USERNAME,
                                  config.MQTT_PASSWORD,
                                  config.MQTT_TOPICS_TO_SUBSCRIBE)
-globals.mqtt_handler = MqttHandler()
 globals.clickhouse_client = Client(host=config.CLICKHOUSE_HOST,
                                    port=config.CLICKHOUSE_PORT,
                                    user=config.CLICKHOUSE_USER)

@@ -71,3 +71,16 @@ class StatisticDeserializer(BaseDeserializer):
         if des is None:
             raise DeserializerValueError(f"unknown type \"{self.metric}\"")
         self.data = des(message)
+
+
+class EnergyMeterDeserializer(BaseDeserializer):
+    @catch_key_error
+    def deserialize(self, message: dict):
+        self.device_eui: str = message["device_eui"]
+        self.device: str = message["device"]
+
+
+class EnergyMeterListDeserializer(BaseDeserializer):
+    @catch_key_error
+    def deserialize(self, message: dict):
+        self.energy_meters: list[EnergyMeterDeserializer] = [EnergyMeterDeserializer(dev) for dev in message]

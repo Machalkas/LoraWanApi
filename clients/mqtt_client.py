@@ -65,9 +65,9 @@ class MqttClient:
             await self.connect()
 
     async def publish(self, topic: str, payload: Union[str, dict], qos: int = 1):
-        if isinstance(payload, dict):
+        if isinstance(payload, (dict, list)):
             payload = json.dumps(payload)
-        self.client.publish(topic, payload, qos)
+        self.client.publish(message_or_topic=topic, payload=payload, qos=qos)
 
 
 if __name__ == "__main__":

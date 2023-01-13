@@ -28,5 +28,5 @@ class Api:
         deserializer = handler_dict.get("deserializer")
         handler = handler_dict.get("handler")
         if deserializer is None:
-            return await handler(handler_self, topic)
-        return await handler(handler_self, deserializer(message), topic)
+            return await handler(handler_self, topic=topic)
+        return await handler(handler_self, message=deserializer(message), topic=topic)

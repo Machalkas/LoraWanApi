@@ -1,9 +1,13 @@
 import json
-from deserializers import StatisticDeserializer
+from sqlalchemy.orm import Session
+from deserializers import StatisticDeserializer, EnergyMeterListDeserializer
 from deserializers.exceptions import BaseDeserializerException
 from utils.api import Api
 from utils.globals import globals
 from utils import logger
+from app_energy_meters.crud import update_energy_meter_list
+from app_energy_meters.schemas import EnergyMeterCreateSchema
+from database_clients.postgres_client import SessionLocal
 
 mqtt_api = Api()
 
@@ -29,3 +33,12 @@ class MqttHandler:
     @mqtt_api.handler("device/*/get_statistic")
     async def get_statistic(self, topic: str):
         pass
+
+    @mqtt_api.handler("device/*/update_energy_meters", EnergyMeterListDeserializer)
+    async def update_energy_meters(self, message: EnergyMeterListDeserializer, topic: str):
+        db = SessionLocal()
+        schemas = [EnergyMeterCreateSchema(device_eui=dev.device_eui, device=dev.device)
+                   for dev in message.energy_meters]
+        new_energy_meters = update_energy_meter_list(db, schemas)
+        kekus = [dev.to_dict() for dev in new_energy_meters]
+        await globals.mqtt_client.publish(topic+"/response", kekus, 1)
