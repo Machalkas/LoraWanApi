@@ -9,9 +9,11 @@ import config
 from app_energy_meters.view import router as energy_meters_router
 from app_users.view import router as users_router
 
+global_prefix = "/api"
+
 app = FastAPI()
-app.include_router(energy_meters_router)
-app.include_router(users_router)
+app.include_router(energy_meters_router, prefix=global_prefix)
+app.include_router(users_router, prefix=global_prefix)
 globals.mqtt_client = MqttClient(globals.mqtt_handler, config.MQTT_HOST, config.MQTT_PORT, config.MQTT_USERNAME,
                                  config.MQTT_PASSWORD,
                                  config.MQTT_TOPICS_TO_SUBSCRIBE)

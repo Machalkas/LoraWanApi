@@ -5,7 +5,7 @@ from . import models, schemas, crud
 from database_clients.postgres_client import SessionLocal, engine
 from utils.globals import globals
 
-router = APIRouter()
+router = APIRouter(prefix="/energy_meters")
 models.Base.metadata.create_all(bind=engine)
 
 
@@ -25,7 +25,7 @@ def get_clickhouse_writer_or_raise(metric):
     return ch_writer
 
 
-@router.get("/energy_meter/get_statistic/{counter_id}", response_model=schemas.StatisticSchema)
+@router.get("/get_statistic/{counter_id}", response_model=schemas.StatisticSchema)
 async def get_statistic(counter_id: int, metric: str, from_dt: datetime = None, to_dt: datetime = None,
                         columns: str = None, limit: int = None):
     ch_writer = get_clickhouse_writer_or_raise(metric)
@@ -41,12 +41,12 @@ async def get_statistic(counter_id: int, metric: str, from_dt: datetime = None, 
     return schemas.StatisticSchema(**response)
 
 
-@router.get("/energy_meter/get_last_statistic/{counter_id}")
+@router.get("/get_last_statistic/{counter_id}")
 async def get_last_statistic(counter_id: int, metric: str, rows_number: int = 1):
     ch_writer = get_clickhouse_writer_or_raise(metric)
 
 
-@router.post("/energy_meter/add_energy_meter_room", response_model=schemas.EnergyMeterRoomSchema)
+@router.post("/add_energy_meter_room", response_model=schemas.EnergyMeterRoomSchema)
 async def create_energy_meter_room(energy_meter_room: schemas.EnergyMeterRoomCreateSchema, db: Session = Depends(get_db)):
     db_energy_meter_room = crud.get_energy_meter_room_by_device_serial(db,
                                                                        device_serial=energy_meter_room.device_serial)
@@ -56,17 +56,17 @@ async def create_energy_meter_room(energy_meter_room: schemas.EnergyMeterRoomCre
     return crud.create_energy_meter_room(db, energy_meter_room)
 
 
-@router.get("/energy_meter/get_energy_meters_rooms_list", response_model=list[schemas.EnergyMeterRoomSchema])
+@router.get("/get_energy_meters_rooms_list", response_model=list[schemas.EnergyMeterRoomSchema])
 async def get_energy_meters_rooms_list(db: Session = Depends(get_db)):
     return crud.get_energy_meter_room_list(db)
 
 
-@router.get("/energy_meter/get_energy_meters", response_model=list[schemas.EnergyMeterSchema])
+@router.get("/get_energy_meters", response_model=list[schemas.EnergyMeterSchema])
 async def get_energy_meters_list(db: Session = Depends(get_db)):
     return crud.get_energy_meter_list(db)
 
 
-@router.post("/energy_meter/test", response_model=list[schemas.EnergyMeterSchema])
+@router.post("/test", response_model=list[schemas.EnergyMeterSchema])
 async def update_energy_meters(new_dev: list[schemas.EnergyMeterCreateSchema], db: Session = Depends(get_db)):
     return crud.update_energy_meter_list(db, new_dev)
 

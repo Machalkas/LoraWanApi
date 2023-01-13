@@ -6,7 +6,7 @@ from . import models, crud, schemas, utils
 from database_clients.postgres_client import SessionLocal, engine
 import config
 
-router = APIRouter()
+router = APIRouter(prefix="/users")
 models.Base.metadata.create_all(bind=engine)
 
 
@@ -26,7 +26,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.post("/users/registration", response_model=schemas.UserSchema)
+@router.post("/registration", response_model=schemas.UserSchema)
 async def user_registration(new_user: schemas.UserRegistrationSchema, db: Session = Depends(utils.get_db)):
     if new_user.email is not None and crud.is_user_email_exists(db, new_user.email):
         raise HTTPException(
@@ -45,6 +45,6 @@ async def user_registration(new_user: schemas.UserRegistrationSchema, db: Sessio
     return db_user
 
 
-@router.get("/users/me/", response_model=schemas.UserSchema)
+@router.get("/me", response_model=schemas.UserSchema)
 async def read_users_me(current_user: models.User = Depends(utils.get_current_user)):
     return current_user
