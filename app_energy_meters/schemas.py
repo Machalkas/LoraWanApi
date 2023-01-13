@@ -31,7 +31,6 @@ class EnergyMeterSchema(BaseModel):
 class EnergyMeterCreateSchema(BaseModel):
     device_eui: str
     device: str
-    is_active: bool
 
     class Config:
         orm_mode = True

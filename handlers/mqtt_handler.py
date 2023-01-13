@@ -24,8 +24,8 @@ class MqttHandler:
     @mqtt_api.handler("device/*/save_statistic", StatisticDeserializer)
     async def save_statistic(self, message: StatisticDeserializer, topic: str):
         data = message.data.get_dict()
-        globals.clickhouse_writers[message.type].add_values(data)
+        globals.clickhouse_writers[message.metric].add_values(data)
 
-    @mqtt_api.handler("device/*get_statistic")
+    @mqtt_api.handler("device/*/get_statistic")
     async def get_statistic(self, topic: str):
         pass

@@ -23,8 +23,28 @@ def get_energy_meter_room_list(db: Session):
     return db.query(models.EnergyMeterRoom).all()
 
 
-def get_energy_meter_list(db: Session):
-    return db.query(models.EnergyMeter).all()
+def get_energy_meter_list(db: Session) -> list[models.EnergyMeter]:
+    return db.query(models.EnergyMeter).order_by(models.EnergyMeter.id).all()
+
+
+def update_energy_meter_list(db: Session, topical_devices_list: list[schemas.EnergyMeterCreateSchema]) -> list[models.EnergyMeter]:
+    topical_devices_eui = {device.device_eui for device in topical_devices_list}
+    current_devices = get_energy_meter_list(db)
+    already_exist_eui = set()
+    for device in current_devices:
+        if device.device_eui not in topical_devices_eui:
+            device.is_active = False
+        else:
+            already_exist_eui.add(device.device_eui)
+            device.is_active = True
+    new_devices_eui = topical_devices_eui - already_exist_eui
+    new_devices = [
+        models.EnergyMeter(device_eui=device.device_eui, is_active=True, device=device.device)
+        for device in topical_devices_list if device.device_eui in new_devices_eui
+    ]
+    db.bulk_save_objects(new_devices)
+    db.commit()
+    return get_energy_meter_list(db)
 
 
 def add_energy_meters_access(db: Session, user_energy_meter: schemas.EnergyMetersAccessCreateSchema) -> models.EnergyMetersAccess:

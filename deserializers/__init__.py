@@ -61,13 +61,13 @@ class TrafficDataDeserializer(BaseDeserializer):
 
 
 class StatisticDeserializer(BaseDeserializer):
-    statistic_types = {"power": PowerDataDeserializer, "traffic": TrafficDataDeserializer}
+    statistic_metrics = {"power": PowerDataDeserializer, "traffic": TrafficDataDeserializer}
 
     @catch_key_error
     def deserialize(self, message: dict):
-        self.type: str = message["type"]
+        self.metric: str = message["metric"]
         self.data: BaseDeserializer = None
-        des = self.statistic_types.get(self.type)
+        des = self.statistic_metrics.get(self.metric)
         if des is None:
-            raise DeserializerValueError(f"unknown type \"{self.type}\"")
+            raise DeserializerValueError(f"unknown type \"{self.metric}\"")
         self.data = des(message)
