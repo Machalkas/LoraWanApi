@@ -34,4 +34,4 @@ TRAFFIC_TABLE_QUERY = f"CREATE TABLE IF NOT EXISTS {CLICKHOUSE_DB_NAME}.traffic 
 DEFAULT_ROLES: list = [topic.strip().upper() for topic in os.getenv("user", "admin").split(",")]
 DEFAULT_ADMIN_USER: dict = json.loads(os.getenv("DEFAULT_ADMIN_USER", '{"username": "admin", "email": null, "password": "qwerty123"}'))
 
-DT_FORMAT = "%Y-%m-%d %H:%M:%S.%f%z"
+DT_FORMAT = "%Y-%m-%d %H:%M:%S"

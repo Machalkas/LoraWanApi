@@ -20,25 +20,30 @@ class MqttHandler:
         logger.debug(f"handle {topic}")
         try:
             result = await mqtt_api.handle_request(self, message, topic)
-            await globals.mqtt_client.publish(topic+"/response", result, 1)
+            await globals.mqtt_client.publish(topic+"/response", result)
         except BaseDeserializerException as ex:
             logger.error(f"Fail handle request {topic} -> {type(ex).__name__}: {ex}")
-            await globals.mqtt_client.publish(topic+"/response", {"error": str(ex)}, 1)
+            await globals.mqtt_client.publish(topic+"/response", {"error": str(ex)})
 
-    @mqtt_api.handler("device/*/save_statistic", StatisticDeserializer)
+    @mqtt_api.handler("device/save_statistic", StatisticDeserializer)
     async def save_statistic(self, message: StatisticDeserializer, topic: str):
         data = message.data.get_dict()
         globals.clickhouse_writers[message.metric].add_values(data)
 
-    @mqtt_api.handler("device/*/get_statistic")
+    @mqtt_api.handler("device/get_statistic")
     async def get_statistic(self, topic: str):
         pass
 
-    @mqtt_api.handler("device/*/update_energy_meters", EnergyMeterListDeserializer)
+    @mqtt_api.handler("device/update_energy_meters", EnergyMeterListDeserializer)
     async def update_energy_meters(self, message: EnergyMeterListDeserializer, topic: str):
         db = SessionLocal()
         schemas = [EnergyMeterCreateSchema(device_eui=dev.device_eui, device=dev.device)
                    for dev in message.energy_meters]
         new_energy_meters = update_energy_meter_list(db, schemas)
         kekus = [dev.to_dict() for dev in new_energy_meters]
-        await globals.mqtt_client.publish(topic+"/response", kekus, 1)
+        await globals.mqtt_client.publish(topic+"/response", kekus)
+    
+    @mqtt_api.not_found_handler()
+    async def not_found(self, topic: str):
+        logger.warning(f"Handler for topic {topic} not found")
+        await globals.mqtt_client.publish(topic+"/response", {"error": "handler not found"})
