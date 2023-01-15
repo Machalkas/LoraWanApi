@@ -9,7 +9,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
 PGSQL_HOST = os.getenv("PGSQL_HOST", "localhost")
 PGSQL_PORT = os.getenv("PGSQL_PORT", "5432")
 PGSQL_USER = os.getenv("PGSQL_USER", "admin")
-PGSQL_PASSWORD = os.getenv("PGSQL_PASSWORD", "iotlab")
+PGSQL_PASSWORD = os.getenv("PGSQL_PASSWORD", "admin")
 PGSQL_DB_NAME = os.getenv("PGSQL_DB_NAME", "vega")
 
 CLICKHOUSE_DB_NAME = os.getenv("CLICKHOUSE_DB_NAME", "vega")
