@@ -124,9 +124,9 @@ class ClickHouseCustomClient(ClickHouseGlobals):
         if filter_sql_query:
             sql_query += f" WHERE {filter_sql_query}"
         if order_by:
-            sql_query += f" ORDER BY `{order_by.split()[0]}`"
+            sql_query += f" ORDER BY `{order_by.split()[0]}` DESC"
         if limit and limit > 0:
-            sql_query += f"LIMIT {limit}"
+            sql_query += f" LIMIT {limit}"
 
         data_from_db = self.clickhouse_client.execute(sql_query+";")
         data_response["from_db"] = data_from_db

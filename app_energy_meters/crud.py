@@ -2,20 +2,24 @@ from sqlalchemy.orm import Session
 from . import models, schemas
 
 
-def create_energy_meter_room(db: Session, energy_meter_room: schemas.EnergyMeterRoomCreateSchema):
-    db_energy_meter_room = models.EnergyMeterRoom(device_serial=energy_meter_room.device_serial,
-                                                  room=energy_meter_room.room)
-    db.add(db_energy_meter_room)
+def create_energy_meter_rooms(db: Session, energy_meter_rooms: list[schemas.EnergyMeterRoomCreateSchema]):
+    db_energy_meter_rooms = [models.EnergyMeterRoom(device_serial=emr.device_serial, room=emr.room) for emr in energy_meter_rooms]
+    db.bulk_save_objects(db_energy_meter_rooms)
     db.commit()
-    db.refresh(db_energy_meter_room)
-    return db_energy_meter_room
+    # db.refresh(db_energy_meter_rooms)
+    return get_energy_meter_room_list(db)
 
 
 def get_energy_meter_room(db: Session, id: int):
     return db.query(models.EnergyMeterRoom).filter(models.EnergyMeterRoom.id == id).first()
 
 
-def get_energy_meter_room_by_device_serial(db: Session, device_serial: str):
+def is_energy_meter_room_exists(db: Session, id: int) -> bool:
+    energy_meter_room = db.query(models.EnergyMeterRoom).filter(models.EnergyMeterRoom.id == id).scalar()
+    return True if energy_meter_room is not None else False
+
+
+def get_energy_meter_room_by_device_serial(db: Session, device_serial: str) -> models.EnergyMeterRoom:
     return db.query(models.EnergyMeterRoom).filter(models.EnergyMeterRoom.device_serial == device_serial).first()
 
 

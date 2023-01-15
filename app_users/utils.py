@@ -8,7 +8,7 @@ from . import crud
 import config
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/users/token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 

@@ -11,6 +11,8 @@ class EnergyMeterRoom(Base):
     device_serial = Column(String(100), unique=True)
     room = Column(String(20))
 
+    energy_meters_access_relation = relationship("EnergyMetersAccess", back_populates="energy_meter_relation")
+
 
 class EnergyMeter(Base):
     __tablename__ = "energy_meters"
@@ -18,8 +20,6 @@ class EnergyMeter(Base):
     device_eui = Column(String, unique=True)
     device = Column(String(100), unique=True)
     is_active = Column(Boolean, default=True)
-
-    energy_meters_access_relation = relationship("EnergyMetersAccess", back_populates="energy_meter_relation")
 
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
@@ -31,7 +31,7 @@ class EnergyMetersAccess(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user = Column(String, ForeignKey("users.username", ondelete="CASCADE"), nullable=False)
-    energy_meter = Column(Integer, ForeignKey("energy_meters.id", ondelete="CASCADE"), nullable=False)
+    energy_meter = Column(Integer, ForeignKey("energy_meter_rooms.id", ondelete="CASCADE"), nullable=False)
 
-    energy_meter_relation = relationship("EnergyMeter", back_populates="energy_meters_access_relation")
+    energy_meter_relation = relationship("EnergyMeterRoom", back_populates="energy_meters_access_relation")
     user_relation = relationship("User", back_populates="energy_meters_access_relation")
