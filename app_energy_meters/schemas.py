@@ -55,7 +55,7 @@ class StatisticSchema(BaseModel):
 class EnergyMetersAccessSchema(BaseModel):
     id: int
     user: str
-    energy_meter_room_id: int
+    energy_meter: int
 
     class Config:
         orm_mode = True
