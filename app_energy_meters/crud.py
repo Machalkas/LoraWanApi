@@ -53,7 +53,7 @@ def update_energy_meter_list(db: Session, topical_devices_list: list[schemas.Ene
 
 def add_energy_meters_access(db: Session, user_energy_meter: schemas.EnergyMetersAccessCreateSchema) -> models.EnergyMetersAccess:
     db_user_energy_meter = models.EnergyMetersAccess(user=user_energy_meter.user,
-                                                     energy_meter=user_energy_meter.energy_meter)
+                                                     energy_meter=user_energy_meter.energy_meter_room_id)
     db.add(db_user_energy_meter)
     db.commit()
     db.refresh(db_user_energy_meter)

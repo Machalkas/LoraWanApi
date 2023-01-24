@@ -95,14 +95,14 @@ async def create_energy_meter_access(energy_meter_access: schemas.EnergyMetersAc
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
         )
-    if not crud.is_energy_meter_room_exists(db, energy_meter_access.energy_meter):
+    if not crud.is_energy_meter_room_exists(db, energy_meter_access.energy_meter_room_id):
         if not user_crud.is_user_username_exists(db, energy_meter_access.user):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="EnergyMeterRoom not found"
             )
     if crud.is_energy_meters_access_exists(db, energy_meter_access.user,
-                                           energy_meter_access.energy_meter):
+                                           energy_meter_access.energy_meter_room_id):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Energy_meter_access already exists"
