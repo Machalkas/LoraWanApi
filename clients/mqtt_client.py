@@ -25,6 +25,7 @@ class MqttClient:
         self.client.on_disconnect = self.on_disconnect
         self.client.on_subscribe = self.on_subscribe
         self.client.on_unsubscribe = self.on_unsubscribe
+        self.semaphore = asyncio.Semaphore(10)
 
     def subscribe(self, topics: Union[str, list], qos: int = 1):
         if isinstance(topics, str):
@@ -36,7 +37,7 @@ class MqttClient:
         if topic.endswith("response"):
             return
         payload = payload.decode('utf-8')
-        result = asyncio.ensure_future(self.handler.handle_request(payload, topic), loop=self.event_loop)
+        result = asyncio.ensure_future(self.run_handler(self.handler.handle_request, (payload, topic), self.semaphore), loop=self.event_loop)
 
     def on_connect(self, client, flags, rc, properties):
         logger.info(f"Connect to mqtt broker ({self.host}:{self.port})")
@@ -54,6 +55,10 @@ class MqttClient:
     def on_unsubscribe(self, client: Client, mid, qos, properties):
         topic = client.get_subscriptions_by_mid(mid)
         logger.debug(f"Unsubscribe from topic '{topic}'")
+
+    async def run_handler(self, handler, args: tuple, semaphore: asyncio.Semaphore):
+        async with semaphore:
+            return await handler(*args)
 
     async def connect(self):
         try:

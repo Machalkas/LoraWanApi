@@ -1,11 +1,13 @@
 import asyncio
+import threading
 from queue import Queue
 import time
 from typing import List, Optional
-from clickhouse_driver import Client
-import threading
-from utils import logger
 
+from prometheus_client import Gauge, Histogram
+
+from clickhouse_driver import Client
+from utils import logger
 from config import CLICKHOUSE_DB_NAME, CLICKHOUSE_HOST, CLICKHOUSE_PORT, CLICKHOUSE_USER, CLICKHOUSE_PASSWORD
 
 
@@ -18,7 +20,7 @@ class ClickHouseStorage:
 class ClickHouseGlobals:
     def __init__(self,
                  clickhouse_client: Client,
-                 child_self,
+                 child_self: "ClickHouseCustomClient",
                  alias_name: str,
                  min_inserts_count: Optional[int] = None,
                  max_inserts_count: int = 100,
@@ -44,7 +46,9 @@ class ClickHouseGlobals:
         loop.run_forever()
 
     async def clickhouse_query_executor(self, loop: asyncio.AbstractEventLoop):
+        # pt_clickhouse_executor_histogram = Histogram("queue_length", "Executor queue length")
         while True:
+            # pt_clickhouse_executor_histogram.observe(self.global_vars.query_queue.__sizeof__())
             if not self.global_vars.query_queue.empty():
                 query_dict: dict = self.global_vars.query_queue.get()
                 alias = query_dict.get("alias_name")
@@ -58,7 +62,8 @@ class ClickHouseGlobals:
             await asyncio.sleep(2)
         loop.stop()
 
-    async def scheduler(self, max_inserts_count: int, min_inserts_count: int, timeout: int, child_self):
+    async def scheduler(self, max_inserts_count: int, min_inserts_count: int, timeout: int,
+                        child_self: "ClickHouseCustomClient"):
         timer = time.time()
         while True:
             if len(child_self.values_list) >= max_inserts_count:
@@ -69,6 +74,7 @@ class ClickHouseGlobals:
                 logger.info(f"Timeout trigger fired - {self.alias_name}")
                 self.global_vars.query_queue.put(
                     {"query": child_self.query, "values": child_self.values_list, "alias_name": child_self.alias_name})
+                child_self.pt_custom_client_gauge.dec(len(child_self.values_list))
                 child_self.values_list = []
                 timer = time.time()
             await asyncio.sleep(0.1)
@@ -100,6 +106,8 @@ class ClickHouseCustomClient(ClickHouseGlobals):
         self.table_name = table_name
         self.alias_name = alias_name
         self.values_list: List[dict] = []
+        self.pt_custom_client_gauge = Gauge(f'ch_{table_name.replace(".", "_")}_buffer_size',
+                                            'Size of the clickhouse client buffer')
         super().__init__(clickhouse_client=clickhouse_client,
                          max_inserts_count=max_inserts_count,
                          min_inserts_count=min_inserts_count,
@@ -111,6 +119,7 @@ class ClickHouseCustomClient(ClickHouseGlobals):
         if type(values) is dict and set([*values]) != set(self.columns_names):
             raise Exception("Insert query values do not match")
         self.values_list.append(values)
+        self.pt_custom_client_gauge.inc()
 
     def get(self, columns: list = None, filter_sql_query: str = None, order_by: str = None,
             get_from_buffer: bool = True, limit: int = None):  # TODO: better to return dict

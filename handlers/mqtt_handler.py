@@ -1,5 +1,7 @@
 import json
 from sqlalchemy.orm import Session
+from prometheus_client import Summary
+from prometheus_async.aio import time
 from deserializers import StatisticDeserializer, EnergyMeterListDeserializer
 from deserializers.exceptions import BaseDeserializerException
 from utils.api import Api
@@ -10,10 +12,12 @@ from app_energy_meters.schemas import EnergyMeterCreateSchema
 from database_clients.postgres_client import SessionLocal
 
 mqtt_api = Api()
+summary = Summary("mqtt_handler_time", "How long request handler run")
 
 
 class MqttHandler:
 
+    @time(summary)
     async def handle_request(self, message, topic):
         if not isinstance(message, dict):
             message = json.loads(message)

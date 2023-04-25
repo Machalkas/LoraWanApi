@@ -1,5 +1,8 @@
 import asyncio
+
 from fastapi import FastAPI
+from prometheus_client import start_http_server
+
 from clients.mqtt_client import MqttClient
 from clickhouse_driver import Client
 from database_clients.click_house_client import ClickHouseCustomClient
@@ -27,5 +30,6 @@ globals.clickhouse_writers["power"] = ClickHouseCustomClient(globals.clickhouse_
 globals.clickhouse_writers["traffic"] = ClickHouseCustomClient(globals.clickhouse_client, config.TRAFFIC_TABLE_QUERY,
                                                                max_inserts_count=config.CLICKHOUSE_MAX_COUNT,
                                                                timeout_sec=config.CLICKHOUSE_TIMEOUT)
+start_http_server(8001, '0.0.0.0')
 event_loop = asyncio.get_event_loop()
 event_loop.create_task(globals.mqtt_client.connect())
