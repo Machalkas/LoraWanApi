@@ -82,9 +82,9 @@ async def get_energy_meters_list(db: Session = Depends(get_db)):
     return crud.get_energy_meter_list(db)
 
 
-@router.post("/test", response_model=list[schemas.EnergyMeterSchema])
-async def update_energy_meters(new_dev: list[schemas.EnergyMeterCreateSchema], db: Session = Depends(get_db)):
-    return crud.update_energy_meter_list(db, new_dev)
+# @router.post("/test", response_model=list[schemas.EnergyMeterSchema])
+# async def update_energy_meters(new_dev: list[schemas.EnergyMeterCreateSchema], db: Session = Depends(get_db)):
+#     return crud.update_energy_meter_list(db, new_dev)
 
 
 @router.post("/energy_meter_access", response_model=schemas.EnergyMetersAccessSchema)

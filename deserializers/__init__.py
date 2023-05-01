@@ -3,7 +3,7 @@ from datetime import datetime
 import json
 from typing import Union
 from config import DT_FORMAT
-from deserializers.exceptions import DeserializerKeyError, DeserializerValueError
+from deserializers.exceptions import DeserializerKeyError, DeserializerValueError, ShittyError
 
 
 def catch_key_error(func):
@@ -14,6 +14,9 @@ def catch_key_error(func):
             raise DeserializerKeyError(ex)
         except ValueError as ex:
             raise DeserializerValueError(ex)
+        except Exception as ex:
+            raise ShittyError(ex)
+            
     return wrapper
 
 

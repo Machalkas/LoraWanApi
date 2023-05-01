@@ -18,13 +18,18 @@ summary = Summary("mqtt_handler_time", "How long request handler run")
 class MqttHandler:
 
     @time(summary)
-    async def handle_request(self, message, topic):
+    async def handle_request(self, message: dict | str, topic: str):
         if not isinstance(message, dict):
-            message = json.loads(message)
+            try:
+                message = json.loads(message)
+            except json.decoder.JSONDecodeError:
+                logger.error(f"Fail to deserialize payload: {message}")
+                return
         logger.debug(f"handle {topic}")
         try:
             result = await mqtt_api.handle_request(self, message, topic)
             await globals.mqtt_client.publish(topic+"/response", result)
+            logger.debug(f"end handle {topic}")
         except BaseDeserializerException as ex:
             logger.error(f"Fail handle request {topic} -> {type(ex).__name__}: {ex}")
             await globals.mqtt_client.publish(topic+"/response", {"error": str(ex)})
@@ -33,6 +38,7 @@ class MqttHandler:
     async def save_statistic(self, message: StatisticDeserializer, topic: str):
         data = message.data.get_dict()
         globals.clickhouse_writers[message.metric].add_values(data)
+        await globals.mqtt_client.publish(topic+"/response", {"status": "ok"})
 
     @mqtt_api.handler("device/get_statistic")
     async def get_statistic(self, topic: str):
