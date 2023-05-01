@@ -4,20 +4,15 @@ from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from database_clients.postgres_client import SessionLocal
+from utils.db_dependency import get_db
+from utils.user_roles import RoleManager
 from . import crud
 import config
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/users/token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+role_manager = RoleManager()
 
 
 def verify_password(plain_password, hashed_password):
@@ -48,7 +43,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: SessionLocal = Depends(get_db)):
+def get_current_user(token: str = Depends(oauth2_scheme), db: SessionLocal = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -65,3 +60,14 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: SessionLocal
     if user is None:
         raise credentials_exception
     return user
+
+
+def check_permissions(role: str = "user"):
+    def wrapper(token: str = Depends(oauth2_scheme), db: SessionLocal = Depends(get_db)):
+        user = get_current_user(token, db)
+        if not role_manager.validate_role(user.role, role):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+    return wrapper
