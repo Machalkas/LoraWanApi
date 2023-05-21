@@ -70,4 +70,5 @@ def check_permissions(role: str = "user"):
                 status_code=status.HTTP_403_FORBIDDEN,
                 headers={"WWW-Authenticate": "Bearer"}
             )
+        return user
     return wrapper

@@ -28,8 +28,8 @@ class MqttHandler:
         logger.debug(f"handle {topic}")
         try:
             result = await mqtt_api.handle_request(self, message, topic)
-            await globals.mqtt_client.publish(topic+"/response", result)
-            logger.debug(f"end handle {topic}")
+            if result:
+                await globals.mqtt_client.publish(topic+"/response", result)
         except BaseDeserializerException as ex:
             logger.error(f"Fail handle request {topic} -> {type(ex).__name__}: {ex}")
             await globals.mqtt_client.publish(topic+"/response", {"error": str(ex)})
@@ -38,7 +38,7 @@ class MqttHandler:
     async def save_statistic(self, message: StatisticDeserializer, topic: str):
         data = message.data.get_dict()
         globals.clickhouse_writers[message.metric].add_values(data)
-        await globals.mqtt_client.publish(topic+"/response", {"status": "ok"})
+        return {"status": "ok"}
 
     @mqtt_api.handler("device/get_statistic")
     async def get_statistic(self, topic: str):
@@ -50,10 +50,9 @@ class MqttHandler:
         schemas = [EnergyMeterCreateSchema(device_eui=dev.device_eui, device=dev.device)
                    for dev in message.energy_meters]
         new_energy_meters = update_energy_meter_list(db, schemas)
-        kekus = [dev.to_dict() for dev in new_energy_meters]
-        await globals.mqtt_client.publish(topic+"/response", kekus)
+        return [dev.to_dict() for dev in new_energy_meters]
     
     @mqtt_api.not_found_handler()
     async def not_found(self, topic: str):
         logger.warning(f"Handler for topic {topic} not found")
-        await globals.mqtt_client.publish(topic+"/response", {"error": "handler not found"})
+        return {"error": "handler not found"}

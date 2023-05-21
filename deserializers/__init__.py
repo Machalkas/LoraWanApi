@@ -20,7 +20,7 @@ def catch_key_error(func):
     return wrapper
 
 
-class BaseDeserializer(ABC):
+class BaseDeserializer:
     def __init__(self, message: Union[str, dict]) -> None:
         if isinstance(message, str):
             message = json.loads(message)

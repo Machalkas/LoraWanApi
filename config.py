@@ -24,14 +24,14 @@ MQTT_HOST = os.getenv("MQTT_HOST", "localhost")
 MQTT_PORT = int(os.getenv("MQTT_PORT", 1883))
 MQTT_USERNAME = os.getenv("MQTT_USERNAME")
 MQTT_PASSWORD = os.getenv("MQTT_PASSWORD")
-MQTT_TOPICS_TO_SUBSCRIBE = [topic.strip() for topic in os.getenv("MQTT_TOPICKS_TO_SUBSCRIBE", "statistic, device/#").split(",")]
+MQTT_TOPICS_TO_SUBSCRIBE = [topic.strip() for topic in os.getenv("MQTT_TOPICKS_TO_SUBSCRIBE", "statistic device/#").split()]
 
 IS_DEBUG = False if os.getenv("DEBUG") == "false".lower() else True
 
 POWER_TABLE_QUERY = f"CREATE TABLE IF NOT EXISTS {CLICKHOUSE_DB_NAME}.power (`datetime` DateTime, `counter` UInt32, `phase_a` Nullable(Float64), `phase_b` Nullable(Float64), `phase_c` Nullable(Float64), `total` Nullable(Float64)) ENGINE = Log()"
 TRAFFIC_TABLE_QUERY = f"CREATE TABLE IF NOT EXISTS {CLICKHOUSE_DB_NAME}.traffic (`datetime` DateTime, `counter` UInt32, `traffic_plan_1` Nullable(Float64), `traffic_plan_2` Nullable(Float64), `traffic_plan_3` Nullable(Float64), `traffic_plan_4` Nullable(Float64), `total` Nullable(Float64), `current_traffic` Nullable(Int32)) ENGINE = Log()"
 
-DEFAULT_ROLES: list = [topic.strip().upper() for topic in os.getenv("user", "admin").split(",")]
+DEFAULT_ROLES: list = [topic.strip().upper() for topic in os.getenv("user", "admin").split()]
 DEFAULT_ADMIN_USER: dict = json.loads(os.getenv("DEFAULT_ADMIN_USER", '{"username": "admin", "email": null, "password": "qwerty123"}'))
 TOKEN_LIFETIME_MIN = int(os.getenv("TOKEN_LIFETIME_MIN", 15))
 
