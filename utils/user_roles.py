@@ -46,8 +46,9 @@ class RoleManager:
         role_objects = [self.all_roles.get(user_role)] if not role_objects else role_objects
         for role_object in role_objects:
             if not role_object or role_object.role_name != required_role and not role_object.lower_roles:
-                return False
+                continue
             elif role_object.role_name == required_role:
                 return True
             else:
                 return self.validate_role(user_role, required_role, role_object.lower_roles)
+        return False

@@ -5,7 +5,7 @@ from typing import Union
 from asyncio_mqtt import Client
 from asyncio_mqtt.client import Topic
 from asyncio_mqtt.error import MqttError
-from utils import logger
+from utils import logger, encoders
 # from handlers.mqtt_handler import MqttHandler
 
 class MqttClient:
@@ -94,7 +94,7 @@ class MqttClient:
 
     async def publish(self, topic: str, payload: Union[str, dict], qos: int = 1):
         if isinstance(payload, (dict, list)):
-            payload = json.dumps(payload)
+            payload = json.dumps(payload, cls=encoders.EnumEncoder)
         await self.client.publish(topic=topic, payload=payload, qos=qos)
 
 

@@ -1,5 +1,25 @@
 from pydantic import BaseModel
 
+from app_energy_meters.enums import LoraClientClass
+
+
+class ABP(BaseModel):
+    dev_address: int
+    apps_key: str
+    nwks_key: str
+
+
+class OTAA(BaseModel):
+    app_eui: str
+    app_key: str
+
+
+class NewDeviceDeserializer(BaseModel):
+    dev_eui: str
+    dev_class: LoraClientClass
+    dev_name: str
+    otaa: OTAA | None
+
 
 class EnergyMeterRoomSchema(BaseModel):
     id: int

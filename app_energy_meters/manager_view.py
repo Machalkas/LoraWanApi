@@ -1,6 +1,4 @@
-from fastapi import APIRouter
-
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, Response
 from sqlalchemy.orm import Session
 
 from utils.db_dependency import get_db
@@ -8,7 +6,7 @@ from app_energy_meters import schemas, crud
 from app_users import crud as user_crud
 from app_users import utils as user_utils
 from app_users import models as user_models
-
+from utils.globals import globals
 
 router = APIRouter(prefix="/energy_meters/manage")
 
@@ -52,3 +50,11 @@ async def create_energy_meter_room(energy_meter_rooms: list[schemas.EnergyMeterR
                                 detail=f"EnergyMeter with this device_serial {emr.device_serial} already exist")
 
     return crud.create_energy_meter_rooms(db, energy_meter_rooms)
+
+
+@router.post("/register_energy_meter",
+             dependencies=[Depends(user_utils.check_permissions("manager"))])
+async def register_energy_meter(new_energy_meter: schemas.NewDeviceDeserializer):
+    await globals.mqtt_client.publish(topic="gateway/add_device",
+                                      payload=new_energy_meter.dict())
+    return Response(content="", status_code=status.HTTP_200_OK)
